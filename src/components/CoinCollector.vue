@@ -61,7 +61,7 @@ export default {
 
 h1 {
   text-align: center;
-  color: #333; /* Puedes ajustar el color según tu preferencia */
+  color: #333;
 }
 
 h2 {
