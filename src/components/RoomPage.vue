@@ -42,6 +42,7 @@ export default {
           axios.get(`http://localhost:3000/api/coins/${props.room}`)
             .then((response) => {
               coins.value = response.data;
+              console.log(`Monedas en la habitación ${props.room}:`, coins.value);
             })
             .catch((error) => {
               console.error('Error al obtener las monedas:', error);
@@ -57,6 +58,7 @@ export default {
 
       socket.on('coinsInRoom', (updatedCoins) => {
         coins.value = updatedCoins;
+        console.log(`Monedas en la habitación ${props.room}:`, coins.value);
       });
 
       socket.on('peopleInRoom', (peopleCount) => {
@@ -76,7 +78,7 @@ export default {
       allCoinsCollected.value = newCoins.length === 0;
 
       if (allCoinsCollected.value) {
-        // Configura un temporizador para regenerar las monedas después de una hora
+        
         setTimeout(() => {
           axios.get(`http://localhost:3000/api/coins/${props.room}`)
             .then((response) => {
@@ -86,7 +88,7 @@ export default {
             .catch((error) => {
               console.error('Error al regenerar las monedas:', error);
             });
-        }, 3600000); // 3600000 milisegundos = 1 hora
+        }, 3600000); 
       }
     });
 
