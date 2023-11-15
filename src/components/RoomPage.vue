@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>Moneda Única por Room con Temporizador</h2>
+    <h2>MONEDAS EN LA HABITACION</h2>
     <div v-for="coin in coins" :key="coin.id" @click="grabCoin(coin.id)">
       {{ coin.id }} - ({{ coin.x }}, {{ coin.y }}, {{ coin.z }})
     </div>

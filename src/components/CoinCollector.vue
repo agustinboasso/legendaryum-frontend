@@ -1,13 +1,14 @@
 <template>
   <div class="coin-collector">
     <h1>Coin Collector App</h1>
-    <div class="coin-container">
+    <div >
       <h2>HABITACIONES</h2>
-      <ul>
-        <li v-for="room in rooms" :key="room" @click="enterRoom(room)">
+        <br>
+        
+        <button v-for="room in rooms" :key="room" @click="enterRoom(room)">
           {{ room }}
-        </li>
-      </ul>
+        </button>
+        
     </div>
     <div v-if="selectedRoom">
       <RoomPage :room="selectedRoom" />
