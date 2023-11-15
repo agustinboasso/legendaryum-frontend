@@ -1,11 +1,14 @@
 <template>
   <div>
-    <h2>SALAS</h2>
-    
-      <button v-for="room in rooms" :key="room" @click="enterRoom(room)">
-        {{ room }}
-      </button>
-    
+    <button class="common-button" v-if="rooms.length === 1" @click="enterRoom(rooms[0])">
+      {{ rooms[0] }}
+    </button>
+
+    <button class="common-button" v-else-if="rooms.length > 1" @click="enterRoom('Selecciona una sala')">
+      Selecciona una habitacion
+    </button>
+
+    <p class="common-text" v-else>No hay habitaciones disponibles.</p>
   </div>
 </template>
 
@@ -18,12 +21,9 @@ export default {
   props: ['onRoomSelected'],
   setup(props) {
     const rooms = ref([]);
-    const socket = io('http://localhost:3000'); // Reemplaza con la URL de tu servidor Socket.io
+    const socket = io('http://localhost:3000');
 
     onMounted(() => {
-      // Lógica para obtener la lista de habitaciones desde el servidor
-      // Asume que tienes un endpoint en el backend que devuelve la lista de habitaciones
-      // Ejemplo con axios:
       axios.get('http://localhost:3000/api/rooms')
         .then(response => {
           rooms.value = response.data;
@@ -32,7 +32,6 @@ export default {
           console.error('Error al obtener las habitaciones:', error);
         });
 
-      // Escuchar eventos de actualización de habitaciones en tiempo real
       socket.on('roomListUpdated', updatedRooms => {
         rooms.value = updatedRooms;
       });
@@ -46,3 +45,25 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Estilos comunes */
+.common-button {
+  display: block;
+  width: 150px;
+  height: 30px; 
+  margin: 0 auto; 
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.common-button:hover {
+  background-color: #45a049;
+}
+
+
+</style>
