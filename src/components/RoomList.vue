@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h2>Rooms</h2>
-    <ul>
-      <li v-for="room in rooms" :key="room" @click="enterRoom(room)">
+    <h2>SALAS</h2>
+    
+      <button v-for="room in rooms" :key="room" @click="enterRoom(room)">
         {{ room }}
-      </li>
-    </ul>
+      </button>
+    
   </div>
 </template>
 

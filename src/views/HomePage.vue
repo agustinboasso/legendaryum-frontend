@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>Welcome to the Metaverse Coin Collector!</h2>
-    <RoomList @onRoomSelected="enterRoom" />
+    <RoomList :onRoomSelected="enterRoom" />
     <div v-if="selectedRoom">
       <CoinCollector :room="selectedRoom" />
     </div>
@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import RoomList from '@/components/RoomList.vue'; // Ajusta la ruta según tu estructura de archivos
-import CoinCollector from '@/components/CoinCollector.vue'; // Ajusta la ruta según tu estructura de archivos
+import RoomList from '@/components/RoomList.vue';
+import CoinCollector from '@/components/CoinCollector.vue';
 
 export default {
   components: {

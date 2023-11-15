@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>Metaverse Coin Collector</h1>
+   
     <router-view />
   </div>
 </template>

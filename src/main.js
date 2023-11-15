@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from './views/HomePage.vue';
 import RoomPage from './components/RoomPage.vue';
 
+
 const app = createApp(App);
 const pinia = createPinia();
 
@@ -14,6 +15,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: HomePage },
+
     { path: '/room/:room', component: RoomPage, props: true },
   ],
 });
