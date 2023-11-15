@@ -73,8 +73,8 @@ button {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #4caf50; /* Color de fondo del botón */
-  color: white; /* Color del texto del botón */
+  background-color: #4caf50; 
+  color: white; 
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -82,7 +82,7 @@ button {
 }
 
 button:hover {
-  background-color: #45a049; /* Cambia el color de fondo al pasar el ratón sobre el botón */
+  background-color: #45a049; 
 }
 
 .coin-container {

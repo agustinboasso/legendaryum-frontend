@@ -5,7 +5,7 @@
     </button>
 
     <button class="common-button" v-else-if="rooms.length > 1" @click="enterRoom('Selecciona una sala')">
-      Selecciona una habitacion
+      Ir a las habitaciones
     </button>
 
     <p class="common-text" v-else>No hay habitaciones disponibles.</p>
@@ -47,7 +47,7 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos comunes */
+
 .common-button {
   display: block;
   width: 150px;
