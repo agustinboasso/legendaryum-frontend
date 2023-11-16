@@ -37,6 +37,7 @@ export default {
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
+
     const grabCoin = async (coinId) => {
       try {
         await coinCollectorStore.grabCoin(coinId, props.room);
@@ -85,6 +86,7 @@ export default {
         setTimeout(async () => {
           coins.value = await coinCollectorStore.fetchCoins(props.room);
           allCoinsCollected.value = false;
+
         }, 3600000);
       }
     });
@@ -92,6 +94,7 @@ export default {
     return { coins, grabCoin, numberOfPeople, allCoinsCollected };
   },
 };
+
 </script>
 
 <style scoped>
