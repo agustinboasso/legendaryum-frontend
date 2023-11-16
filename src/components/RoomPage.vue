@@ -37,7 +37,6 @@ export default {
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
-
     const grabCoin = async (coinId) => {
       try {
         await coinCollectorStore.grabCoin(coinId, props.room);
@@ -86,7 +85,6 @@ export default {
         setTimeout(async () => {
           coins.value = await coinCollectorStore.fetchCoins(props.room);
           allCoinsCollected.value = false;
->>>>>>>>> Temporary merge branch 2
         }, 3600000);
       }
     });
