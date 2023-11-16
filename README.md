@@ -50,6 +50,7 @@ npm run lint
 
 #### Configuración
 
+
 ## Asegúrate de configurar la URL del servidor Socket.IO en el archivo de configuración si es necesario.
 
 - // En el archivo de configuración
