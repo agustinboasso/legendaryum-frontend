@@ -75,6 +75,12 @@ export default {
           coins.value = await coinCollectorStore.fetchCoins(props.room);
         }
       });
+      socket.on("regenerateCoins", async ({ room }) => {
+        if (room === props.room) {
+          coins.value = await coinCollectorStore.fetchCoins(props.room);
+          allCoinsCollected.value = false;
+        }
+      });
     });
 
     watch(coinCollectorStore.coins, (newCoins) => {
@@ -82,10 +88,7 @@ export default {
       allCoinsCollected.value = newCoins.length === 0;
 
       if (allCoinsCollected.value) {
-        setTimeout(async () => {
-          coins.value = await coinCollectorStore.fetchCoins(props.room);
-          allCoinsCollected.value = false;
-        }, 3600000);
+        socket.emit("regenerateCoins", { room: props.room });
       }
     });
 

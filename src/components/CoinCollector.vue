@@ -30,9 +30,9 @@ export default {
     const rooms = ref([]);
     const selectedRoom = ref(null);
 
-    onMounted(async() => {
-      axios
-        await coinCollectorStore.fetchRooms();
+    onMounted(async () => {
+      axios;
+      await coinCollectorStore.fetchRooms();
       rooms.value = coinCollectorStore.rooms;
 
       rooms.value = ["sala1", "sala2"];
