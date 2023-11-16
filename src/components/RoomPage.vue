@@ -24,7 +24,7 @@
 
 <script>
 import { ref, onMounted, watch } from 'vue';
-import { useCoinCollectorStore } from '../store/coinCollector'; // Reemplaza con la ruta correcta
+import { useCoinCollectorStore } from '../store/coinCollector'; 
 
 import { io } from 'socket.io-client';
 
