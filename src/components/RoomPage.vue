@@ -4,7 +4,7 @@
     <div class="room-info">
       <p>Personas conectadas: {{ numberOfPeople }}</p>
     </div>
-    
+
     <div v-if="allCoinsCollected">
       <p>Todas las monedas han sido recogidas. Se regenerarán automáticamente después de una hora.</p>
     </div>
@@ -19,96 +19,74 @@
         {{ coin.id }}
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
 import { ref, onMounted, watch } from 'vue';
+import { useCoinCollectorStore } from '../store/coinCollector'; // Reemplaza con la ruta correcta
+
 import { io } from 'socket.io-client';
-import axios from 'axios';
 
 export default {
   props: ['room'],
   setup(props) {
+    const coinCollectorStore = useCoinCollectorStore();
     const coins = ref([]);
     const numberOfPeople = ref(0);
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
-    onMounted(() => {
-       socket.connect();
 
-      socket.on('connect', () => {
-        console.log('Socket connected with ID:', socket.id);
-
-        // Acciones específicas cuando el socket se conecta
-        socket.emit('joinRoom', props.room);
-        console.log(`'joined room', ${props.room}`)
+    const grabCoin = async (coinId) => {
+      try {
+        await coinCollectorStore.grabCoin(coinId, props.room);
+        const updatedCoins = coins.value.filter((coin) => coin.id !== coinId);
+        coins.value = updatedCoins;
+        socket.emit('coinGrabbed', { room: props.room, coinId });
         
-        socket.on('coinGrabbed', (grabbedCoinId) => {
-          coins.value = coins.value.filter((coin) => coin.id !== grabbedCoinId);
-  });
-
-        socket.on('coinsInRoom', (updatedCoins) => {
-          console.log('Coins updated:', updatedCoins);
-          coins.value = updatedCoins;
-          
-        });
-
-        socket.on('peopleInRoom', (peopleCount) => {
-          numberOfPeople.value = peopleCount;
-          console.log('people', peopleCount)
-        });
-
-       
-
-
-        axios.get(`http://localhost:3000/api/coins/${props.room}`)
-          .then((response) => {
-            coins.value = response.data;
-          })
-          .catch((error) => {
-            console.error('Error al obtener las monedas:', error);
-          });
-      });
-
-     
-    });
-
-    const grabCoin = (coinId) => {
-      axios.post(`http://localhost:3000/api/grab/${coinId}`)
-        .then(() => {
-           
-          axios.get(`http://localhost:3000/api/coins/${props.room}`)
-            .then((response) => {
-              coins.value = response.data;
-              console.log(`Monedas en la habitación ${props.room}:`, coins.value);
-              socket.emit('grabCoin', coinId);
-              console.log(`Emitted grabCoin event for coin ${coinId}`);
-            })
-            .catch((error) => {
-              console.error('Error al obtener las monedas:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error al tomar la moneda:', error);
-        });
+      } catch (error) {
+        console.error('Error al tomar la moneda:', error);
+      }
     };
 
-    watch(coins, (newCoins) => {
+  onMounted(async () => {
+    socket.connect()
+    coinCollectorStore.fetchRooms();
+    coins.value = await coinCollectorStore.fetchCoins(props.room);
+
+    socket.emit('joinRoom', props.room);
+    console.log(`'joined room', ${props.room}`)
+    
+    socket.on('coinsInRoom', (updatedCoins) => {
+      coins.value = updatedCoins;
+      console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+    });
+
+    socket.on('peopleInRoom', (peopleCount) => {
+      numberOfPeople.value = peopleCount;
+      console.log('people', peopleCount)
+    });
+
+  
+    socket.on('updateRoom', async ({ room }) => {
+      if (room === props.room) {
+
+        numberOfPeople.value = io.sockets.adapter.rooms[room].length;
+        coins.value = await coinCollectorStore.fetchCoins(props.room);
+      }
+    });
+  });
+
+    watch(coinCollectorStore.coins, (newCoins) => {
+      coins.value = newCoins;
       allCoinsCollected.value = newCoins.length === 0;
 
       if (allCoinsCollected.value) {
-        setTimeout(() => {
-          axios.get(`http://localhost:3000/api/coins/${props.room}`)
-            .then((response) => {
-              coins.value = response.data;
-              allCoinsCollected.value = false;
-            })
-            .catch((error) => {
-              console.error('Error al regenerar las monedas:', error);
-            });
+        setTimeout(async () => {
+          coins.value = await coinCollectorStore.fetchCoins(props.room);
+          allCoinsCollected.value = false;
+
         }, 3600000);
       }
     });
