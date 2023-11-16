@@ -14,25 +14,23 @@
 
 <script>
 import { ref, onMounted } from 'vue';
+import { useCoinCollectorStore } from '../store/coinCollector'; 
 import { io } from 'socket.io-client';
-import axios from 'axios';
+
 
 export default {
   props: ['onRoomSelected'],
   setup(props) {
+     const coinCollectorStore = useCoinCollectorStore();
     const rooms = ref([]);
     const socket = io('http://localhost:3000');
 
-    onMounted(() => {
-      axios.get('http://localhost:3000/api/rooms')
-        .then(response => {
-          rooms.value = response.data;
-        })
-        .catch(error => {
-          console.error('Error al obtener las habitaciones:', error);
-        });
+   onMounted(async () => {
+      // Utiliza la acción del almacenamiento para obtener las habitaciones
+      await coinCollectorStore.fetchRooms();
+      rooms.value = coinCollectorStore.rooms;
 
-      socket.on('roomListUpdated', updatedRooms => {
+      socket.on('roomListUpdated', (updatedRooms) => {
         rooms.value = updatedRooms;
       });
     });
