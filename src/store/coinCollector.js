@@ -40,6 +40,5 @@ export const useCoinCollectorStore = defineStore("coinCollector", {
         console.error("Error grabbing coin:", error);
       }
     },
-    
   },
 });

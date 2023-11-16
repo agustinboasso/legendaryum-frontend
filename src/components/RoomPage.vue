@@ -82,7 +82,6 @@ export default {
         }
       });
     });
-    
 
     watch(coinCollectorStore.coins, (newCoins) => {
       coins.value = newCoins;
