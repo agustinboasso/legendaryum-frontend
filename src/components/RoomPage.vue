@@ -36,13 +36,56 @@ export default {
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
+    onMounted(() => {
+       socket.connect();
+
+      socket.on('connect', () => {
+        console.log('Socket connected with ID:', socket.id);
+
+        // Acciones específicas cuando el socket se conecta
+        socket.emit('joinRoom', props.room);
+        console.log(`'joined room', ${props.room}`)
+        
+        socket.on('coinGrabbed', (grabbedCoinId) => {
+          coins.value = coins.value.filter((coin) => coin.id !== grabbedCoinId);
+  });
+
+        socket.on('coinsInRoom', (updatedCoins) => {
+          console.log('Coins updated:', updatedCoins);
+          coins.value = updatedCoins;
+          
+        });
+
+        socket.on('peopleInRoom', (peopleCount) => {
+          numberOfPeople.value = peopleCount;
+          console.log('people', peopleCount)
+        });
+
+       
+
+
+        axios.get(`http://localhost:3000/api/coins/${props.room}`)
+          .then((response) => {
+            coins.value = response.data;
+          })
+          .catch((error) => {
+            console.error('Error al obtener las monedas:', error);
+          });
+      });
+
+     
+    });
+
     const grabCoin = (coinId) => {
       axios.post(`http://localhost:3000/api/grab/${coinId}`)
         .then(() => {
+           
           axios.get(`http://localhost:3000/api/coins/${props.room}`)
             .then((response) => {
               coins.value = response.data;
               console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+              socket.emit('grabCoin', coinId);
+              console.log(`Emitted grabCoin event for coin ${coinId}`);
             })
             .catch((error) => {
               console.error('Error al obtener las monedas:', error);
@@ -53,32 +96,10 @@ export default {
         });
     };
 
-    onMounted(() => {
-      socket.emit('joinRoom', props.room);
-
-      socket.on('coinsInRoom', (updatedCoins) => {
-        coins.value = updatedCoins;
-        console.log(`Monedas en la habitación ${props.room}:`, coins.value);
-      });
-
-      socket.on('peopleInRoom', (peopleCount) => {
-        numberOfPeople.value = peopleCount;
-      });
-
-      axios.get(`http://localhost:3000/api/coins/${props.room}`)
-        .then((response) => {
-          coins.value = response.data;
-        })
-        .catch((error) => {
-          console.error('Error al obtener las monedas:', error);
-        });
-    });
-
     watch(coins, (newCoins) => {
       allCoinsCollected.value = newCoins.length === 0;
 
       if (allCoinsCollected.value) {
-        
         setTimeout(() => {
           axios.get(`http://localhost:3000/api/coins/${props.room}`)
             .then((response) => {
@@ -88,13 +109,14 @@ export default {
             .catch((error) => {
               console.error('Error al regenerar las monedas:', error);
             });
-        }, 3600000); 
+        }, 3600000);
       }
     });
 
     return { coins, grabCoin, numberOfPeople, allCoinsCollected };
   },
 };
+
 </script>
 
 <style scoped>
