@@ -18,6 +18,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import RoomPage from "./RoomPage.vue";
+import { useCoinCollectorStore } from "../store/coinCollector";
 import axios from "axios";
 
 export default {
@@ -25,20 +26,16 @@ export default {
     RoomPage,
   },
   setup() {
+    const coinCollectorStore = useCoinCollectorStore();
     const rooms = ref([]);
     const selectedRoom = ref(null);
 
-    onMounted(() => {
+    onMounted(async() => {
       axios
-        .get("http://localhost:3000/api/rooms")
-        .then((response) => {
-          rooms.value = response.data;
-        })
-        .catch((error) => {
-          console.error("Error al obtener las habitaciones:", error);
-        });
+        await coinCollectorStore.fetchRooms();
+      rooms.value = coinCollectorStore.rooms;
 
-      rooms.value = ["sala1", "sala2", "sala3"];
+      rooms.value = ["sala1", "sala2"];
     });
 
     const enterRoom = (room) => {
