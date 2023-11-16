@@ -1,10 +1,18 @@
 <template>
   <div>
-    <button class="common-button" v-if="rooms.length === 1" @click="enterRoom(rooms[0])">
+    <button
+      class="common-button"
+      v-if="rooms.length === 1"
+      @click="enterRoom(rooms[0])"
+    >
       {{ rooms[0] }}
     </button>
 
-    <button class="common-button" v-else-if="rooms.length > 1" @click="enterRoom('Selecciona una sala')">
+    <button
+      class="common-button"
+      v-else-if="rooms.length > 1"
+      @click="enterRoom('Selecciona una sala')"
+    >
       Ir a las habitaciones
     </button>
 
@@ -13,24 +21,23 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import { useCoinCollectorStore } from '../store/coinCollector'; 
-import { io } from 'socket.io-client';
-import { SOCKET_SERVER_URL } from '../../configURL'
+import { ref, onMounted } from "vue";
+import { useCoinCollectorStore } from "../store/coinCollector";
+import { io } from "socket.io-client";
+import { SOCKET_SERVER_URL } from "../../configURL";
 
 export default {
-  props: ['onRoomSelected'],
+  props: ["onRoomSelected"],
   setup(props) {
     const coinCollectorStore = useCoinCollectorStore();
     const rooms = ref([]);
     const socket = io(SOCKET_SERVER_URL);
 
-   onMounted(async () => {
-      
+    onMounted(async () => {
       await coinCollectorStore.fetchRooms();
       rooms.value = coinCollectorStore.rooms;
 
-      socket.on('roomListUpdated', (updatedRooms) => {
+      socket.on("roomListUpdated", (updatedRooms) => {
         rooms.value = updatedRooms;
       });
     });
@@ -45,12 +52,11 @@ export default {
 </script>
 
 <style scoped>
-
 .common-button {
   display: block;
   width: 150px;
-  height: 30px; 
-  margin: 0 auto; 
+  height: 30px;
+  margin: 0 auto;
   background-color: #4caf50;
   color: white;
   border: none;
@@ -62,6 +68,4 @@ export default {
 .common-button:hover {
   background-color: #45a049;
 }
-
-
 </style>

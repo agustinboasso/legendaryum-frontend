@@ -1,14 +1,13 @@
 <template>
   <div class="coin-collector">
     <h1>Coin Collector App</h1>
-    <div >
+    <div>
       <h2>HABITACIONES</h2>
-        <h3>Para cambiar de habitación, refreseque la página</h3>
-        
-        <button v-for="room in rooms" :key="room" @click="enterRoom(room)">
-          {{ room }}
-        </button>
-        
+      <h3>Para cambiar de habitación, refreseque la página</h3>
+
+      <button v-for="room in rooms" :key="room" @click="enterRoom(room)">
+        {{ room }}
+      </button>
     </div>
     <div v-if="selectedRoom">
       <RoomPage :room="selectedRoom" />
@@ -17,13 +16,12 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
-import RoomPage from './RoomPage.vue'; 
-import axios from 'axios';
+import { ref, onMounted } from "vue";
+import RoomPage from "./RoomPage.vue";
+import axios from "axios";
 
 export default {
   components: {
-    
     RoomPage,
   },
   setup() {
@@ -31,17 +29,16 @@ export default {
     const selectedRoom = ref(null);
 
     onMounted(() => {
-      
-      axios.get('http://localhost:3000/api/rooms')
-        .then(response => {
+      axios
+        .get("http://localhost:3000/api/rooms")
+        .then((response) => {
           rooms.value = response.data;
         })
-        .catch(error => {
-          console.error('Error al obtener las habitaciones:', error);
+        .catch((error) => {
+          console.error("Error al obtener las habitaciones:", error);
         });
 
-      
-      rooms.value = ['sala1', 'sala2', 'sala3'];
+      rooms.value = ["sala1", "sala2", "sala3"];
     });
 
     const enterRoom = (room) => {
@@ -73,8 +70,8 @@ button {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  background-color: #4caf50; 
-  color: white; 
+  background-color: #4caf50;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -82,7 +79,7 @@ button {
 }
 
 button:hover {
-  background-color: #45a049; 
+  background-color: #45a049;
 }
 
 .coin-container {

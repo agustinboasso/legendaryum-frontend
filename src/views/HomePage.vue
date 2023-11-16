@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import RoomList from '@/components/RoomList.vue';
-import CoinCollector from '@/components/CoinCollector.vue';
+import RoomList from "@/components/RoomList.vue";
+import CoinCollector from "@/components/CoinCollector.vue";
 
 export default {
   components: {

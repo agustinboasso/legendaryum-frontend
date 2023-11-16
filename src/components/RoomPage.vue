@@ -6,7 +6,10 @@
     </div>
 
     <div v-if="allCoinsCollected">
-      <p>Todas las monedas han sido recogidas. Se regenerarán automáticamente después de una hora.</p>
+      <p>
+        Todas las monedas han sido recogidas. Se regenerarán automáticamente
+        después de una hora.
+      </p>
     </div>
     <div class="coin-container">
       <div
@@ -23,13 +26,13 @@
 </template>
 
 <script>
-import { ref, onMounted, watch } from 'vue';
-import { useCoinCollectorStore } from '../store/coinCollector'; 
-import { SOCKET_SERVER_URL } from '../../configURL'
-import { io } from 'socket.io-client';
+import { ref, onMounted, watch } from "vue";
+import { useCoinCollectorStore } from "../store/coinCollector";
+import { SOCKET_SERVER_URL } from "../../configURL";
+import { io } from "socket.io-client";
 
 export default {
-  props: ['room'],
+  props: ["room"],
   setup(props) {
     const coinCollectorStore = useCoinCollectorStore();
     const coins = ref([]);
@@ -42,40 +45,37 @@ export default {
         await coinCollectorStore.grabCoin(coinId, props.room);
         const updatedCoins = coins.value.filter((coin) => coin.id !== coinId);
         coins.value = updatedCoins;
-        socket.emit('coinGrabbed', { room: props.room, coinId });
-        
+        socket.emit("coinGrabbed", { room: props.room, coinId });
       } catch (error) {
-        console.error('Error al tomar la moneda:', error);
+        console.error("Error al tomar la moneda:", error);
       }
     };
 
-  onMounted(async () => {
-    socket.connect()
-    coinCollectorStore.fetchRooms();
-    coins.value = await coinCollectorStore.fetchCoins(props.room);
+    onMounted(async () => {
+      socket.connect();
+      coinCollectorStore.fetchRooms();
+      coins.value = await coinCollectorStore.fetchCoins(props.room);
 
-    socket.emit('joinRoom', props.room);
-    console.log(`'joined room', ${props.room}`)
-    
-    socket.on('coinsInRoom', (updatedCoins) => {
-      coins.value = updatedCoins;
-      console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+      socket.emit("joinRoom", props.room);
+      console.log(`'joined room', ${props.room}`);
+
+      socket.on("coinsInRoom", (updatedCoins) => {
+        coins.value = updatedCoins;
+        console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+      });
+
+      socket.on("peopleInRoom", (peopleCount) => {
+        numberOfPeople.value = peopleCount;
+        console.log("people", peopleCount);
+      });
+
+      socket.on("updateRoom", async ({ room }) => {
+        if (room === props.room) {
+          numberOfPeople.value = io.sockets.adapter.rooms[room].length;
+          coins.value = await coinCollectorStore.fetchCoins(props.room);
+        }
+      });
     });
-
-    socket.on('peopleInRoom', (peopleCount) => {
-      numberOfPeople.value = peopleCount;
-      console.log('people', peopleCount)
-    });
-
-  
-    socket.on('updateRoom', async ({ room }) => {
-      if (room === props.room) {
-
-        numberOfPeople.value = io.sockets.adapter.rooms[room].length;
-        coins.value = await coinCollectorStore.fetchCoins(props.room);
-      }
-    });
-  });
 
     watch(coinCollectorStore.coins, (newCoins) => {
       coins.value = newCoins;
