@@ -26,7 +26,7 @@ export default {
     const socket = io('http://localhost:3000');
 
    onMounted(async () => {
-      // Utiliza la acción del almacenamiento para obtener las habitaciones
+      
       await coinCollectorStore.fetchRooms();
       rooms.value = coinCollectorStore.rooms;
 
