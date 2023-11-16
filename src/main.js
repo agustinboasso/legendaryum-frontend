@@ -1,13 +1,13 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import { createPinia } from 'pinia';
+import { pinia } from './store/';
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from './views/HomePage.vue';
 import RoomPage from './components/RoomPage.vue';
 
 
 const app = createApp(App);
-const pinia = createPinia();
+
 
 app.use(pinia);
 
