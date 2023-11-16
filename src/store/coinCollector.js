@@ -1,5 +1,7 @@
+// coinCollector.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
+
 export const useCoinCollectorStore = defineStore('coinCollector', {
   state: () => ({
     rooms: [],
@@ -13,9 +15,7 @@ export const useCoinCollectorStore = defineStore('coinCollector', {
     async fetchRooms() {
       try {
         const response = await axios.get('http://localhost:3000/api/rooms');
-        const data = await response.json()
-        console.log(data)
-        this.rooms = data;
+        this.rooms = response.data;
       } catch (error) {
         console.error('Error fetching rooms:', error);
       }

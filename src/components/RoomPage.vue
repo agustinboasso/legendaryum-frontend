@@ -4,7 +4,7 @@
     <div class="room-info">
       <p>Personas conectadas: {{ numberOfPeople }}</p>
     </div>
-    
+
     <div v-if="allCoinsCollected">
       <p>Todas las monedas han sido recogidas. Se regenerarán automáticamente después de una hora.</p>
     </div>
@@ -19,76 +19,70 @@
         {{ coin.id }}
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
 import { ref, onMounted, watch } from 'vue';
+import { useCoinCollectorStore } from '../store/coinCollector'; // Reemplaza con la ruta correcta
+
 import { io } from 'socket.io-client';
-import axios from 'axios';
 
 export default {
   props: ['room'],
   setup(props) {
+    const coinCollectorStore = useCoinCollectorStore();
     const coins = ref([]);
     const numberOfPeople = ref(0);
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
-    const grabCoin = (coinId) => {
-      axios.post(`http://localhost:3000/api/grab/${coinId}`)
-        .then(() => {
-          axios.get(`http://localhost:3000/api/coins/${props.room}`)
-            .then((response) => {
-              coins.value = response.data;
-              console.log(`Monedas en la habitación ${props.room}:`, coins.value);
-            })
-            .catch((error) => {
-              console.error('Error al obtener las monedas:', error);
-            });
-        })
-        .catch((error) => {
-          console.error('Error al tomar la moneda:', error);
-        });
+    const grabCoin = async (coinId) => {
+      try {
+        await coinCollectorStore.grabCoin(coinId, props.room);
+        const updatedCoins = coins.value.filter((coin) => coin.id !== coinId);
+        coins.value = updatedCoins;
+        socket.emit('coinGrabbed', { room: props.room, coinId });
+        
+      } catch (error) {
+        console.error('Error al tomar la moneda:', error);
+      }
     };
 
-    onMounted(() => {
-      socket.emit('joinRoom', props.room);
+   onMounted(async () => {
+  coinCollectorStore.fetchRooms();
+  coins.value = await coinCollectorStore.fetchCoins(props.room);
 
-      socket.on('coinsInRoom', (updatedCoins) => {
-        coins.value = updatedCoins;
-        console.log(`Monedas en la habitación ${props.room}:`, coins.value);
-      });
+  socket.emit('joinRoom', props.room);
 
-      socket.on('peopleInRoom', (peopleCount) => {
-        numberOfPeople.value = peopleCount;
-      });
+  socket.on('coinsInRoom', (updatedCoins) => {
+    coins.value = updatedCoins;
+    console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+  });
 
-      axios.get(`http://localhost:3000/api/coins/${props.room}`)
-        .then((response) => {
-          coins.value = response.data;
-        })
-        .catch((error) => {
-          console.error('Error al obtener las monedas:', error);
-        });
-    });
+  socket.on('peopleInRoom', (peopleCount) => {
+    numberOfPeople.value = peopleCount;
+  });
 
-    watch(coins, (newCoins) => {
+  // Escucha el evento para la actualización en tiempo real
+  socket.on('updateRoom', async ({ room }) => {
+    if (room === props.room) {
+      // Actualiza la cantidad de personas y las monedas en tiempo real
+      numberOfPeople.value = io.sockets.adapter.rooms[room].length;
+      coins.value = await coinCollectorStore.fetchCoins(props.room);
+    }
+  });
+});
+
+    watch(coinCollectorStore.coins, (newCoins) => {
+      coins.value = newCoins;
       allCoinsCollected.value = newCoins.length === 0;
 
       if (allCoinsCollected.value) {
-        
-        setTimeout(() => {
-          axios.get(`http://localhost:3000/api/coins/${props.room}`)
-            .then((response) => {
-              coins.value = response.data;
-              allCoinsCollected.value = false;
-            })
-            .catch((error) => {
-              console.error('Error al regenerar las monedas:', error);
-            });
-        }, 3600000); 
+        setTimeout(async () => {
+          coins.value = await coinCollectorStore.fetchCoins(props.room);
+          allCoinsCollected.value = false;
+        }, 3600000);
       }
     });
 
