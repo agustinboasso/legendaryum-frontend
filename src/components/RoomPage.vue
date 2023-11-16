@@ -25,6 +25,7 @@
 <script>
 import { ref, onMounted, watch } from 'vue';
 import { useCoinCollectorStore } from '../store/coinCollector'; // Reemplaza con la ruta correcta
+
 import { io } from 'socket.io-client';
 
 export default {
@@ -39,27 +40,42 @@ export default {
     const grabCoin = async (coinId) => {
       try {
         await coinCollectorStore.grabCoin(coinId, props.room);
-        coins.value = await coinCollectorStore.fetchCoins(props.room);
+        const updatedCoins = coins.value.filter((coin) => coin.id !== coinId);
+        coins.value = updatedCoins;
+        socket.emit('coinGrabbed', { room: props.room, coinId });
+        
       } catch (error) {
         console.error('Error al tomar la moneda:', error);
       }
     };
 
-    onMounted(async () => {
-      coinCollectorStore.fetchRooms();
-      coins.value = await coinCollectorStore.fetchCoins(props.room);
+  onMounted(async () => {
+    socket.connect()
+    coinCollectorStore.fetchRooms();
+    coins.value = await coinCollectorStore.fetchCoins(props.room);
 
-      socket.emit('joinRoom', props.room);
-
-      socket.on('coinsInRoom', (updatedCoins) => {
-        coins.value = updatedCoins;
-        console.log(`Monedas en la habitación ${props.room}:`, coins.value);
-      });
-
-      socket.on('peopleInRoom', (peopleCount) => {
-        numberOfPeople.value = peopleCount;
-      });
+    socket.emit('joinRoom', props.room);
+    console.log(`'joined room', ${props.room}`)
+    
+    socket.on('coinsInRoom', (updatedCoins) => {
+      coins.value = updatedCoins;
+      console.log(`Monedas en la habitación ${props.room}:`, coins.value);
     });
+
+    socket.on('peopleInRoom', (peopleCount) => {
+      numberOfPeople.value = peopleCount;
+      console.log('people', peopleCount)
+    });
+
+  
+    socket.on('updateRoom', async ({ room }) => {
+      if (room === props.room) {
+
+        numberOfPeople.value = io.sockets.adapter.rooms[room].length;
+        coins.value = await coinCollectorStore.fetchCoins(props.room);
+      }
+    });
+  });
 
     watch(coinCollectorStore.coins, (newCoins) => {
       coins.value = newCoins;
