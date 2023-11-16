@@ -37,6 +37,46 @@ export default {
     const allCoinsCollected = ref(false);
     const socket = io('http://localhost:3000');
 
+    onMounted(() => {
+       socket.connect();
+
+      socket.on('connect', () => {
+        console.log('Socket connected with ID:', socket.id);
+
+        // Acciones específicas cuando el socket se conecta
+        socket.emit('joinRoom', props.room);
+        console.log(`'joined room', ${props.room}`)
+        
+        socket.on('coinGrabbed', (grabbedCoinId) => {
+          coins.value = coins.value.filter((coin) => coin.id !== grabbedCoinId);
+  });
+
+        socket.on('coinsInRoom', (updatedCoins) => {
+          console.log('Coins updated:', updatedCoins);
+          coins.value = updatedCoins;
+          
+        });
+
+        socket.on('peopleInRoom', (peopleCount) => {
+          numberOfPeople.value = peopleCount;
+          console.log('people', peopleCount)
+        });
+
+       
+
+
+        axios.get(`http://localhost:3000/api/coins/${props.room}`)
+          .then((response) => {
+            coins.value = response.data;
+          })
+          .catch((error) => {
+            console.error('Error al obtener las monedas:', error);
+          });
+      });
+
+     
+    });
+
     const grabCoin = async (coinId) => {
       try {
         await coinCollectorStore.grabCoin(coinId, props.room);
@@ -92,6 +132,7 @@ export default {
     return { coins, grabCoin, numberOfPeople, allCoinsCollected };
   },
 };
+
 </script>
 
 <style scoped>
