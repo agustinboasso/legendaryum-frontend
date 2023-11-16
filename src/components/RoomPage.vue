@@ -49,30 +49,33 @@ export default {
       }
     };
 
-   onMounted(async () => {
-  coinCollectorStore.fetchRooms();
-  coins.value = await coinCollectorStore.fetchCoins(props.room);
+  onMounted(async () => {
+    socket.connect()
+    coinCollectorStore.fetchRooms();
+    coins.value = await coinCollectorStore.fetchCoins(props.room);
 
-  socket.emit('joinRoom', props.room);
+    socket.emit('joinRoom', props.room);
+    console.log(`'joined room', ${props.room}`)
+    
+    socket.on('coinsInRoom', (updatedCoins) => {
+      coins.value = updatedCoins;
+      console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+    });
 
-  socket.on('coinsInRoom', (updatedCoins) => {
-    coins.value = updatedCoins;
-    console.log(`Monedas en la habitación ${props.room}:`, coins.value);
+    socket.on('peopleInRoom', (peopleCount) => {
+      numberOfPeople.value = peopleCount;
+      console.log('people', peopleCount)
+    });
+
+  
+    socket.on('updateRoom', async ({ room }) => {
+      if (room === props.room) {
+
+        numberOfPeople.value = io.sockets.adapter.rooms[room].length;
+        coins.value = await coinCollectorStore.fetchCoins(props.room);
+      }
+    });
   });
-
-  socket.on('peopleInRoom', (peopleCount) => {
-    numberOfPeople.value = peopleCount;
-  });
-
-  // Escucha el evento para la actualización en tiempo real
-  socket.on('updateRoom', async ({ room }) => {
-    if (room === props.room) {
-      // Actualiza la cantidad de personas y las monedas en tiempo real
-      numberOfPeople.value = io.sockets.adapter.rooms[room].length;
-      coins.value = await coinCollectorStore.fetchCoins(props.room);
-    }
-  });
-});
 
     watch(coinCollectorStore.coins, (newCoins) => {
       coins.value = newCoins;
