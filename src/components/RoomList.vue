@@ -16,14 +16,14 @@
 import { ref, onMounted } from 'vue';
 import { useCoinCollectorStore } from '../store/coinCollector'; 
 import { io } from 'socket.io-client';
-
+import { SOCKET_SERVER_URL } from '../../configURL'
 
 export default {
   props: ['onRoomSelected'],
   setup(props) {
-     const coinCollectorStore = useCoinCollectorStore();
+    const coinCollectorStore = useCoinCollectorStore();
     const rooms = ref([]);
-    const socket = io('http://localhost:3000');
+    const socket = io(SOCKET_SERVER_URL);
 
    onMounted(async () => {
       

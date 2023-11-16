@@ -25,7 +25,7 @@
 <script>
 import { ref, onMounted, watch } from 'vue';
 import { useCoinCollectorStore } from '../store/coinCollector'; 
-
+import { SOCKET_SERVER_URL } from '../../configURL'
 import { io } from 'socket.io-client';
 
 export default {
@@ -35,7 +35,7 @@ export default {
     const coins = ref([]);
     const numberOfPeople = ref(0);
     const allCoinsCollected = ref(false);
-    const socket = io('http://localhost:3000');
+    const socket = io(SOCKET_SERVER_URL);
 
     const grabCoin = async (coinId) => {
       try {
